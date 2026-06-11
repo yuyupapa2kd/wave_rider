@@ -15,9 +15,9 @@ class SectorAssignmentService
   private
 
   def resolve_sector
+    return Sector.find_or_create_by!(name: @new_sector_name) if @new_sector_name.present?
     return Sector.find(@sector_id) if @sector_id.present?
-    return Sector.unassigned if @new_sector_name.blank?
 
-    Sector.find_or_create_by!(name: @new_sector_name)
+    Sector.unassigned
   end
 end

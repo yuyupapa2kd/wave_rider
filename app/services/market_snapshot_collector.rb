@@ -1,4 +1,7 @@
 class MarketSnapshotCollector
+  MIN_TRADE_VALUE = 100_000_000_000
+  MIN_CHANGE_RATE = 10
+
   class CollectionError < StandardError; end
 
   def initialize(client: Kiwoom::Client.new)
@@ -73,10 +76,14 @@ class MarketSnapshotCollector
   private
 
   def collect_items(trade_date)
-    candidates = @client.top_volume_candidates.first(100).select { |candidate| candidate.fetch(:change_rate).positive? }
+    candidates = @client.top_volume_candidates.first(100).select { |candidate| listing_candidate?(candidate) }
     candidates.map do |candidate|
       candidate.merge(metrics: collect_metrics(candidate.fetch(:ticker), trade_date))
     end
+  end
+
+  def listing_candidate?(candidate)
+    candidate.fetch(:trade_value) >= MIN_TRADE_VALUE || candidate.fetch(:change_rate) >= MIN_CHANGE_RATE
   end
 
   def collect_metrics(ticker, trade_date)

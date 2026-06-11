@@ -7,7 +7,7 @@ class MarketSnapshotCollectorTest < ActiveSupport::TestCase
     end
 
     def top_volume_candidates
-      [ { ticker: "005930", name: "삼성전자", trade_value: 1, volume: 1, current_price: 70_000, change_rate: 1, raw_payload: {} } ]
+      [ { ticker: "005930", name: "삼성전자", trade_value: 1, volume: 1, current_price: 70_000, change_rate: 10, raw_payload: {} } ]
     end
 
     def investor_flows(_ticker, trade_date)
@@ -32,10 +32,16 @@ class MarketSnapshotCollectorTest < ActiveSupport::TestCase
         {
           ticker: "%06d" % index,
           name: "종목#{index}",
-          trade_value: 101 - index,
+          trade_value: index == 99 ? 100_000_000_000 : 101 - index,
           volume: 101 - index,
           current_price: 1_000,
-          change_rate: index == 99 ? 0 : 1,
+          change_rate: if index == 0
+                         10
+                       elsif index == 99
+                         9.99
+                       else
+                         12
+                       end,
           raw_payload: {}
         }
       end
@@ -74,7 +80,7 @@ class MarketSnapshotCollectorTest < ActiveSupport::TestCase
     assert_equal 1, snapshot.snapshot_items.count
   end
 
-  test "filters non-positive movers after selecting top 100 by volume" do
+  test "keeps candidates with trade value over 100 billion won or change rate over 10 percent" do
     snapshot = MarketSnapshotCollector.new(client: TopHundredClient.new).collect!(
       trade_date: Date.new(2026, 6, 5),
       snapshot_type: "intraday"
@@ -83,8 +89,9 @@ class MarketSnapshotCollectorTest < ActiveSupport::TestCase
     tickers = snapshot.snapshot_items.joins(:stock).pluck("stocks.ticker")
 
     assert_equal "success", snapshot.status
-    assert_equal 99, tickers.size
-    assert_not_includes tickers, "000099"
+    assert_equal 100, tickers.size
+    assert_includes tickers, "000099"
     assert_not_includes tickers, "000100"
+    assert_includes tickers, "000000"
   end
 end

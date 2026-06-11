@@ -223,31 +223,77 @@ select {
 }
 
 .sector-grid {
+  align-items: start;
   display: grid;
-  gap: 16px;
+  gap: 22px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 480px));
   justify-content: start;
 }
 
 .sector-box {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  --sector-accent: #0f766e;
+  --sector-accent-soft: #e8f6f3;
+  --sector-panel: #fbfefd;
+  background: var(--sector-panel);
+  border: 1px solid #cfdde0;
+  border-bottom: 6px solid var(--sector-accent);
+  border-right: 6px solid var(--sector-accent);
   border-radius: 8px;
+  box-shadow: 0 12px 26px rgba(23, 32, 38, 0.08);
+  align-content: start;
   display: grid;
   gap: 12px;
   min-width: 0;
-  padding: 14px;
+  overflow: hidden;
+  padding: 0 14px 14px;
+}
+
+.sector-box:nth-child(5n+2) {
+  --sector-accent: #2563eb;
+  --sector-accent-soft: #eaf1ff;
+  --sector-panel: #fbfdff;
+}
+
+.sector-box:nth-child(5n+3) {
+  --sector-accent: #b45309;
+  --sector-accent-soft: #fff4df;
+  --sector-panel: #fffdf8;
+}
+
+.sector-box:nth-child(5n+4) {
+  --sector-accent: #7c3aed;
+  --sector-accent-soft: #f2edff;
+  --sector-panel: #fdfbff;
+}
+
+.sector-box:nth-child(5n) {
+  --sector-accent: #be123c;
+  --sector-accent-soft: #fff0f3;
+  --sector-panel: #fffafb;
 }
 
 .sector-box.is-unassigned {
+  --sector-accent: #7b8790;
+  --sector-accent-soft: #eef1f2;
+  --sector-panel: #f8f9f8;
+  border-color: #c8d0d4;
   border-style: dashed;
+  border-bottom-color: var(--sector-accent);
+  border-bottom-style: solid;
+  border-right-color: var(--sector-accent);
+  border-right-style: solid;
+  box-shadow: 0 8px 20px rgba(23, 32, 38, 0.05);
 }
 
 .sector-header {
   align-items: start;
+  background: var(--sector-accent-soft);
+  border-bottom: 1px solid #d7e0e3;
   display: flex;
   gap: 12px;
   justify-content: space-between;
+  margin: 0 -14px;
+  padding: 12px 14px;
 }
 
 .sector-header h2 {
@@ -255,16 +301,31 @@ select {
   margin: 0 0 4px;
 }
 
-.sector-header span,
 .ticker {
   color: var(--muted);
   font-size: 12px;
 }
 
+.sector-count {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(23, 32, 38, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+}
+
 .sector-metrics {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(23, 32, 38, 0.08);
+  border-radius: 8px;
   display: grid;
   gap: 2px;
   justify-items: end;
+  min-width: 96px;
+  padding: 6px 8px;
 }
 
 .sector-metrics strong {
@@ -272,11 +333,12 @@ select {
 }
 
 .sector-metrics span {
-  color: var(--accent-dark);
+  color: var(--sector-accent);
   font-weight: 700;
 }
 
 .sector-items {
+  align-content: start;
   display: grid;
   gap: 10px;
   grid-auto-rows: max-content;
@@ -451,21 +513,26 @@ select {
 
 .metric-table {
   border-collapse: collapse;
-  font-size: 12px;
-  min-width: max(520px, 100%);
-  width: max-content;
+  font-size: 10px;
+  min-width: 0;
+  table-layout: fixed;
+  width: 100%;
 }
 
 .metric-table th,
 .metric-table td {
   border-bottom: 1px solid var(--line);
-  padding: 6px;
+  overflow: hidden;
+  padding: 5px 2px;
   text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .metric-table th:first-child,
 .metric-table td:first-child {
   text-align: left;
+  width: 42px;
 }
 
 @media (max-width: 720px) {
@@ -492,6 +559,12 @@ select {
 
   .sector-box {
     padding: 12px;
+    padding-top: 0;
+  }
+
+  .sector-header {
+    margin-left: -12px;
+    margin-right: -12px;
   }
 
   .sector-form {

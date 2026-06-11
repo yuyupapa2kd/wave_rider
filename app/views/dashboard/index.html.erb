@@ -49,7 +49,7 @@
           <header class="sector-header">
             <div>
               <h2><%= group.sector.name %></h2>
-              <span><%= group.items.size %>종목</span>
+              <span class="sector-count"><%= group.items.size %>종목</span>
             </div>
             <div class="sector-metrics">
               <strong><%= format_ekrw(group.total_trade_value) %></strong>
@@ -111,25 +111,25 @@
                   <div class="metric-table-wrap">
                     <table class="metric-table">
                       <thead>
-                        <tr>
-                          <th>일자</th>
-                          <th>기관계</th>
-                          <th>연기금</th>
-                          <th>외국인</th>
-                          <th>개인</th>
-                          <th>체결강도</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <% item.daily_metrics.each do |metric| %>
-                          <tr>
-                            <td><%= metric.metric_date.strftime("%m/%d") %></td>
-                            <td><%= format_signed_number(metric.institution_net_purchase) %></td>
-                            <td><%= format_signed_number(metric.pension_net_purchase) %></td>
-                            <td><%= format_signed_number(metric.foreign_net_purchase) %></td>
-                            <td><%= format_signed_number(metric.individual_net_purchase) %></td>
-                            <td><%= number_with_precision(metric.execution_strength, precision: 2) %></td>
-                          </tr>
+	                        <tr>
+	                          <th>일자</th>
+	                          <th>기관</th>
+	                          <th>연금</th>
+	                          <th>외인</th>
+	                          <th>개인</th>
+	                          <th>강도</th>
+	                        </tr>
+	                      </thead>
+	                      <tbody>
+	                        <% item.daily_metrics.each do |metric| %>
+	                          <tr>
+	                            <td><%= metric.metric_date.strftime("%m/%d") %></td>
+	                            <td title="<%= format_signed_number(metric.institution_net_purchase) %>"><%= format_compact_signed_number(metric.institution_net_purchase) %></td>
+	                            <td title="<%= format_signed_number(metric.pension_net_purchase) %>"><%= format_compact_signed_number(metric.pension_net_purchase) %></td>
+	                            <td title="<%= format_signed_number(metric.foreign_net_purchase) %>"><%= format_compact_signed_number(metric.foreign_net_purchase) %></td>
+	                            <td title="<%= format_signed_number(metric.individual_net_purchase) %>"><%= format_compact_signed_number(metric.individual_net_purchase) %></td>
+	                            <td><%= number_with_precision(metric.execution_strength, precision: 2) %></td>
+	                          </tr>
                         <% end %>
                       </tbody>
                     </table>
