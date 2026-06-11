@@ -1,0 +1,17 @@
+/.bundle
+/.cache
+/.env*
+!/.env.example
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/.keep
+/vendor/bundle
+/vendor/bundle-gems
+/public/assets
+/config/master.key
+/config/credentials/*.key

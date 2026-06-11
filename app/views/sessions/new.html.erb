@@ -1,0 +1,18 @@
+<section class="login-panel">
+  <h1>로그인</h1>
+
+  <%= form_with url: session_path, class: "login-form" do |form| %>
+    <label>
+      아이디
+      <%= form.text_field :username, autofocus: true, autocomplete: "username" %>
+    </label>
+
+    <label>
+      비밀번호
+      <%= form.password_field :password, autocomplete: "current-password" %>
+    </label>
+
+    <%= form.submit "로그인", class: "primary-button" %>
+  <% end %>
+</section>
+

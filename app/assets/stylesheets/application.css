@@ -1,0 +1,500 @@
+/*
+ * This is a manifest file that'll be compiled into application.css.
+ *
+ * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
+ * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
+ * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
+ * depending on specificity.
+ *
+ * Consider organizing styles into separate files for maintainability.
+ */
+
+:root {
+  --bg: #f6f7f8;
+  --panel: #ffffff;
+  --ink: #172026;
+  --muted: #687782;
+  --line: #dce2e6;
+  --accent: #0f766e;
+  --accent-dark: #115e59;
+  --danger: #b42318;
+  --warning: #a15c07;
+  --leader: #f4c430;
+  --stock-card-collapsed-height: 340px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.topbar {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  height: 56px;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.page {
+  margin: 0 auto;
+  max-width: 1680px;
+  padding: 24px;
+}
+
+.flash,
+.snapshot-message {
+  border-radius: 8px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+}
+
+.notice {
+  background: #e8f6f3;
+  color: var(--accent-dark);
+}
+
+.alert,
+.snapshot-message {
+  background: #fff0ed;
+  color: var(--danger);
+}
+
+.login-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 64px auto;
+  max-width: 400px;
+  padding: 24px;
+}
+
+.login-panel h1 {
+  font-size: 22px;
+  margin: 0 0 18px;
+}
+
+.login-form,
+.toolbar-form,
+.sector-form {
+  display: grid;
+  gap: 12px;
+}
+
+.login-form label,
+.toolbar-form label {
+  color: var(--muted);
+  display: grid;
+  font-size: 13px;
+  gap: 6px;
+}
+
+input,
+select {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  min-height: 38px;
+  padding: 7px 10px;
+}
+
+.primary-button,
+.ghost-button,
+.small-button {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: 38px;
+  padding: 7px 12px;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: var(--accent-dark);
+}
+
+.ghost-button {
+  background: #ffffff;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.small-button {
+  background: var(--ink);
+  color: #ffffff;
+  min-height: 32px;
+  padding: 5px 9px;
+}
+
+.dashboard {
+  display: grid;
+  gap: 16px;
+}
+
+.toolbar {
+  align-items: end;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.toolbar-form {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.toolbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.status-badge {
+  background: #eef2f4;
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+
+.status-success {
+  background: #e8f6f3;
+  color: var(--accent-dark);
+}
+
+.status-failed {
+  background: #fff0ed;
+  color: var(--danger);
+}
+
+.status-collecting {
+  background: #fff6e6;
+  color: var(--warning);
+}
+
+.empty-state {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.empty-state h1 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.empty-state p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.sector-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 480px));
+  justify-content: start;
+}
+
+.sector-box {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.sector-box.is-unassigned {
+  border-style: dashed;
+}
+
+.sector-header {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.sector-header h2 {
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+
+.sector-header span,
+.ticker {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sector-metrics {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+}
+
+.sector-metrics strong {
+  font-size: 18px;
+}
+
+.sector-metrics span {
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.sector-items {
+  display: grid;
+  gap: 10px;
+  grid-auto-rows: max-content;
+  max-height: calc(var(--stock-card-collapsed-height) * 5 + 40px);
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.stock-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-sizing: border-box;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: var(--stock-card-collapsed-height);
+  padding: 12px;
+  position: relative;
+}
+
+.stock-card-summary {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stock-card.is-leader {
+  border-color: var(--leader);
+  box-shadow: inset 4px 0 0 var(--leader);
+}
+
+.stock-header {
+  align-items: start;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.stock-header h3 {
+  font-size: 16px;
+  margin: 0 0 3px;
+}
+
+.leader-form {
+  flex: 0 0 auto;
+}
+
+.leader-toggle {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 13px;
+  gap: 6px;
+  min-height: 28px;
+  white-space: nowrap;
+}
+
+.leader-toggle input {
+  min-height: auto;
+}
+
+.stock-metrics {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.stock-metrics strong {
+  color: var(--accent-dark);
+}
+
+.stock-chart-frame {
+  aspect-ratio: 500 / 280;
+  background: #eef2f4;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  inline-size: 100%;
+  justify-self: center;
+  max-inline-size: 420px;
+  overflow: hidden;
+}
+
+.stock-chart {
+  block-size: 100%;
+  display: block;
+  inline-size: 100%;
+  object-fit: contain;
+}
+
+.sector-chip-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.sector-chip {
+  background: #eef2f4;
+  border-radius: 999px;
+  color: var(--ink);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 9px;
+}
+
+.sector-editor {
+  position: relative;
+}
+
+.sector-editor summary {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  list-style: none;
+  width: 28px;
+}
+
+.sector-editor summary::-webkit-details-marker {
+  display: none;
+}
+
+.sector-form {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(23, 32, 38, 0.16);
+  min-width: 240px;
+  padding: 10px;
+  position: absolute;
+  top: 34px;
+  z-index: 4;
+}
+
+.metric-details {
+  border-top: 1px solid var(--line);
+  display: block;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  min-width: 0;
+  padding-top: 10px;
+  position: relative;
+  width: 100%;
+}
+
+.metric-details summary {
+  align-items: center;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  min-height: 28px;
+  width: max-content;
+}
+
+.metric-table-wrap {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin-top: 8px;
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%;
+}
+
+.metric-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: max(520px, 100%);
+  width: max-content;
+}
+
+.metric-table th,
+.metric-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 6px;
+  text-align: right;
+}
+
+.metric-table th:first-child,
+.metric-table td:first-child {
+  text-align: left;
+}
+
+@media (max-width: 720px) {
+  .topbar,
+  .page {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .toolbar {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .toolbar-form,
+  .toolbar-actions {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .sector-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sector-box {
+    padding: 12px;
+  }
+
+  .sector-form {
+    left: -64px;
+  }
+}

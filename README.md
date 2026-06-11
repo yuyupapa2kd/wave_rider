@@ -1,0 +1,129 @@
+# CPB Bot
+
+Rails 8 기반 한국 주식 섹터/대장주 선별 대시보드입니다. 개인용으로 Tailscale/VPN 안에서 접속하는 전제를 둡니다.
+
+## 구성
+
+- Rails 8.1, PostgreSQL, Solid Queue
+- Hotwire: ERB, Turbo, Stimulus
+- 단일 관리자 로그인
+- 키움증권 REST API 실전 도메인: `https://api.kiwoom.com`
+
+## 환경 변수
+
+`.env.example`을 기준으로 `.env`를 만들고 값을 채웁니다.
+
+- `ADMIN_USERNAME`, `ADMIN_PASSWORD`
+- `KIWOOM_APP_KEY`, `KIWOOM_SECRET_KEY`
+- `KIWOOM_REQUEST_DELAY`
+
+API 키와 시크릿은 DB에 저장하지 않습니다.
+
+## Docker 실행
+
+```sh
+cp .env.example .env
+docker compose build
+docker compose up -d db
+docker compose run --rm web ./bin/rails db:prepare
+docker compose up -d web jobs
+```
+
+앱 접속:
+
+```text
+http://localhost:3000
+```
+
+## VPN 직접 접속
+
+Mac mini와 접속할 기기에 Tailscale을 설치하고 같은 tailnet에 로그인하면, Mac mini의 Tailscale IP로 직접 접속할 수 있습니다.
+
+Mac mini에서 Tailscale IPv4 주소를 확인합니다.
+
+```sh
+tailscale ip -4
+```
+
+`no current Tailscale IPs; state: Stopped`가 나오면 Tailscale이 꺼져 있는 상태입니다. macOS 메뉴 막대의 Tailscale 앱에서 `Turn On` 또는 `Log In`을 먼저 실행합니다. CLI로 시작할 수 있는 설치 환경이면 아래 명령을 사용합니다.
+
+```sh
+sudo tailscale up
+```
+
+상태 확인:
+
+```sh
+tailscale status
+tailscale ip -4
+```
+
+Docker 서비스가 실행 중인지 확인합니다.
+
+```sh
+docker compose ps
+```
+
+다른 기기에서 Tailscale VPN을 켠 뒤 아래 주소로 접속합니다.
+
+```text
+http://<mac-mini-tailscale-ip>:3000
+```
+
+예:
+
+```text
+http://100.x.y.z:3000
+```
+
+현재 개발 환경 설정은 Tailscale IP 대역(`100.64.0.0/10`)을 Rails host로 허용합니다. Tailscale MagicDNS 이름으로 접속하려면 `.env`에 해당 호스트명을 추가하고 `web`을 재시작합니다.
+
+```env
+APP_HOSTS=mac-mini-name.tailnet-name.ts.net,mac-mini-name
+```
+
+```sh
+docker compose restart web
+```
+
+주의:
+
+- 이 방식은 `docker-compose.yml`의 `web` 포트가 `"3000:3000"`으로 열려 있어야 합니다.
+- 공유기에서 3000번 포트를 포트포워딩하지 마세요.
+- 앱 로그인 비밀번호는 긴 값으로 바꾸세요.
+- PostgreSQL은 외부 접속이 필요 없으면 `db` 서비스의 `ports` 설정을 제거하는 편이 안전합니다.
+
+## Docker 재빌드
+
+코드 변경 후 이미지까지 새로 만들고 싶으면 실행 중인 컨테이너를 내리고, 기존 로컬 이미지를 삭제한 뒤 다시 빌드합니다.
+
+```sh
+docker compose down --rmi local --remove-orphans
+docker compose build --no-cache
+docker compose up -d db
+docker compose run --rm web ./bin/rails db:prepare
+docker compose up -d web jobs
+```
+
+PostgreSQL 데이터 볼륨까지 완전히 삭제해야 할 때만 아래 명령을 사용합니다. 저장된 스냅샷과 섹터 수정 내역도 함께 사라집니다.
+
+```sh
+docker compose down --volumes --rmi local --remove-orphans
+```
+
+## 수집 스케줄
+
+Solid Queue recurring task가 아래 두 시각에 수집 잡을 넣습니다.
+
+- 15:00 장중 스냅샷
+- 16:00 장마감 확정 스냅샷
+
+각 잡은 키움 API로 실제 거래일 여부를 확인하고, 비거래일이면 수집하지 않습니다.
+
+## 검증
+
+```sh
+docker compose run --rm web ./bin/rails test
+docker compose run --rm web ./bin/rails zeitwerk:check
+docker compose run --rm web bundle exec rubocop
+```

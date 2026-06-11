@@ -1,0 +1,145 @@
+<section class="dashboard">
+  <div class="toolbar">
+    <%= form_with url: root_path, method: :get, class: "toolbar-form", data: { controller: "autosubmit" } do |form| %>
+      <label>
+        거래일
+        <%= form.select :trade_date,
+                        options_for_select((@available_dates + [ @trade_date ]).compact.uniq.sort.reverse, @trade_date),
+                        {},
+                        data: { action: "autosubmit#submit" } %>
+      </label>
+
+      <label>
+        스냅샷
+        <%= form.select :snapshot_type,
+                        options_for_select(MarketSnapshot::SNAPSHOT_TYPES.map { |key, label| [ label, key ] }, @snapshot_type),
+                        {},
+                        data: { action: "autosubmit#submit" } %>
+      </label>
+
+      <%= form.submit "조회", class: "ghost-button" %>
+    <% end %>
+
+    <div class="toolbar-actions">
+      <span class="status-badge status-<%= @snapshot&.status || "missing" %>"><%= status_label(@snapshot) %></span>
+      <%= button_to "재수집",
+                    collection_path,
+                    method: :post,
+                    params: { trade_date: @trade_date, snapshot_type: @snapshot_type },
+                    class: "primary-button",
+                    data: { turbo_confirm: "기존 성공 데이터는 재수집 성공 시에만 교체됩니다. 재수집을 시작할까요?" } %>
+    </div>
+  </div>
+
+  <% if @snapshot&.status == "failed" %>
+    <p class="snapshot-message">수집 실패: <%= @snapshot.simple_failure_message %></p>
+  <% elsif @snapshot&.status == "skipped" %>
+    <p class="snapshot-message">비거래일</p>
+  <% end %>
+
+  <% if @snapshot.blank? || !@snapshot.successful_data? %>
+    <div class="empty-state">
+      <h1><%= @trade_date %> <%= MarketSnapshot::SNAPSHOT_TYPES.fetch(@snapshot_type) %></h1>
+      <p>저장된 스냅샷이 없습니다.</p>
+    </div>
+  <% else %>
+    <div class="sector-grid">
+      <% @groups.each do |group| %>
+        <section class="sector-box <%= "is-unassigned" if group.unassigned? %>">
+          <header class="sector-header">
+            <div>
+              <h2><%= group.sector.name %></h2>
+              <span><%= group.items.size %>종목</span>
+            </div>
+            <div class="sector-metrics">
+              <strong><%= format_ekrw(group.total_trade_value) %></strong>
+              <span><%= format_percent(group.weighted_change_rate) %></span>
+            </div>
+          </header>
+
+          <div class="sector-items">
+            <% group.items.each do |item| %>
+              <% stock = item.stock %>
+              <% current_sector = stock.sector_on(@snapshot.trade_date) %>
+              <% is_leader = group.leader_stock_id == stock.id %>
+
+              <article class="stock-card <%= "is-leader" if is_leader %>">
+                <div class="stock-card-summary">
+                  <header class="stock-header">
+                    <div>
+                      <h3><%= stock.name %></h3>
+                      <span class="ticker"><%= stock.ticker %></span>
+                    </div>
+
+                    <%= form_with url: leader_selections_path, class: "leader-form", data: { controller: "autosubmit" } do |form| %>
+                      <%= hidden_field_tag :market_snapshot_id, @snapshot.id %>
+                      <%= hidden_field_tag :stock_id, stock.id %>
+                      <%= hidden_field_tag :checked, "0" %>
+                      <label class="leader-toggle">
+                        <%= check_box_tag :checked, "1", is_leader, data: { action: "autosubmit#submit" } %>
+                        대장주
+                      </label>
+                    <% end %>
+                  </header>
+
+                  <div class="stock-metrics">
+                    <span><%= format_ekrw(item.trade_value) %></span>
+                    <strong><%= format_percent(item.change_rate) %></strong>
+                  </div>
+
+                  <div class="stock-chart-frame">
+                    <img class="stock-chart" src="<%= item.chart_url %>" alt="<%= stock.name %> 일봉차트" loading="lazy">
+                  </div>
+
+                  <div class="sector-chip-row">
+                    <span class="sector-chip"><%= current_sector.name %></span>
+                    <details class="sector-editor">
+                      <summary aria-label="섹터 수정">✎</summary>
+                      <%= form_with url: stock_sector_assignment_path(stock), method: :patch, class: "sector-form" do |form| %>
+                        <%= form.select :sector_id,
+                                        options_from_collection_for_select(@sectors, :id, :name, current_sector.id),
+                                        include_blank: "새 섹터" %>
+                        <%= form.text_field :new_sector_name, placeholder: "새 섹터명" %>
+                        <%= form.submit "저장", class: "small-button" %>
+                      <% end %>
+                    </details>
+                  </div>
+                </div>
+
+                <details class="metric-details">
+                  <summary>10영업일 지표</summary>
+                  <div class="metric-table-wrap">
+                    <table class="metric-table">
+                      <thead>
+                        <tr>
+                          <th>일자</th>
+                          <th>기관계</th>
+                          <th>연기금</th>
+                          <th>외국인</th>
+                          <th>개인</th>
+                          <th>체결강도</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% item.daily_metrics.each do |metric| %>
+                          <tr>
+                            <td><%= metric.metric_date.strftime("%m/%d") %></td>
+                            <td><%= format_signed_number(metric.institution_net_purchase) %></td>
+                            <td><%= format_signed_number(metric.pension_net_purchase) %></td>
+                            <td><%= format_signed_number(metric.foreign_net_purchase) %></td>
+                            <td><%= format_signed_number(metric.individual_net_purchase) %></td>
+                            <td><%= number_with_precision(metric.execution_strength, precision: 2) %></td>
+                          </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+              </article>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  <% end %>
+</section>
