@@ -19,7 +19,8 @@ class MarketSnapshotCollector
       return snapshot
     end
 
-    collected_items = collect_items(trade_date)
+    collected_items = collect_items(snapshot, trade_date)
+    raise CollectionError, "수집 가능한 종목 없음" if collected_items.empty?
 
     MarketSnapshot.transaction do
       snapshot.lock!
@@ -75,10 +76,19 @@ class MarketSnapshotCollector
 
   private
 
-  def collect_items(trade_date)
+  def collect_items(snapshot, trade_date)
     candidates = @client.top_volume_candidates.first(100).select { |candidate| listing_candidate?(candidate) }
-    candidates.map do |candidate|
+    candidates.filter_map do |candidate|
       candidate.merge(metrics: collect_metrics(candidate.fetch(:ticker), trade_date))
+    rescue CollectionError => error
+      log!(
+        snapshot,
+        level: "warn",
+        stage: "metrics",
+        message: error.message,
+        details: { ticker: candidate.fetch(:ticker), name: candidate.fetch(:name) }
+      )
+      nil
     end
   end
 

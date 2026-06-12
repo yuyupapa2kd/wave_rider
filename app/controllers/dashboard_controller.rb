@@ -1,5 +1,7 @@
 class DashboardController < ApplicationController
   def index
+    DueSnapshotEnqueuer.new.enqueue_due!
+
     @trade_date = selected_trade_date
     @snapshot_type = selected_snapshot_type
     @snapshot = MarketSnapshot.find_by(trade_date: @trade_date, snapshot_type: @snapshot_type)

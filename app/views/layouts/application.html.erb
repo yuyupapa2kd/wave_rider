@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Cpb Bot" %></title>
+    <title><%= content_for(:title) || "Wave Rider" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Cpb Bot">
+    <meta name="application-name" content="Wave Rider">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -25,7 +25,7 @@
 
   <body>
     <header class="topbar">
-      <%= link_to "CPB Bot", root_path, class: "brand" %>
+      <%= link_to "Wave Rider", root_path, class: "brand" %>
       <% if logged_in? %>
         <%= button_to "로그아웃", session_path, method: :delete, class: "ghost-button" %>
       <% end %>

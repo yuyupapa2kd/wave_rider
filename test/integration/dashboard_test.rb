@@ -1,6 +1,8 @@
 require "test_helper"
 
 class DashboardTest < ActionDispatch::IntegrationTest
+  include ActiveSupport::Testing::TimeHelpers
+
   test "renders recollection confirmation and stock details collapsed" do
     login
     sector = Sector.create!(name: "반도체")
@@ -16,6 +18,21 @@ class DashboardTest < ActionDispatch::IntegrationTest
     assert_select "[data-turbo-confirm]"
     assert_select "details.metric-details"
     assert_includes response.body, "삼성전자"
+  end
+
+  test "enqueues due snapshot before selecting latest date" do
+    login
+    MarketSnapshot.create!(trade_date: Date.new(2026, 6, 11), snapshot_type: "intraday", status: "success")
+
+    travel_to Time.zone.local(2026, 6, 12, 15, 5) do
+      assert_difference -> { MarketSnapshot.where(trade_date: Date.new(2026, 6, 12), snapshot_type: "intraday").count }, 1 do
+        get root_path
+      end
+    end
+
+    assert_response :success
+    assert_select "select[name='trade_date'] option", text: "2026-06-12"
+    assert_includes response.body, "2026-06-12 15:00 장중"
   end
 
   private

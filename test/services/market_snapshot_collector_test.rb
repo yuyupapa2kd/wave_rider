@@ -7,7 +7,20 @@ class MarketSnapshotCollectorTest < ActiveSupport::TestCase
     end
 
     def top_volume_candidates
-      [ { ticker: "005930", name: "삼성전자", trade_value: 1, volume: 1, current_price: 70_000, change_rate: 10, raw_payload: {} } ]
+      raise Kiwoom::ApiError.new("API 실패", endpoint: "/test")
+    end
+  end
+
+  class PartialMetricsClient
+    def trading_day?(_date)
+      true
+    end
+
+    def top_volume_candidates
+      [
+        { ticker: "000001", name: "부족종목", trade_value: 100_000_000_000, volume: 1, current_price: 1_000, change_rate: 1, raw_payload: {} },
+        { ticker: "000002", name: "정상종목", trade_value: 100_000_000_000, volume: 1, current_price: 1_000, change_rate: 1, raw_payload: {} }
+      ]
     end
 
     def investor_flows(_ticker, trade_date)
@@ -17,8 +30,13 @@ class MarketSnapshotCollectorTest < ActiveSupport::TestCase
       end
     end
 
-    def daily_execution_strength(_ticker)
-      []
+    def daily_execution_strength(ticker)
+      return [] if ticker == "000001"
+
+      10.times.map do |index|
+        date = Date.new(2026, 6, 5) - index.days
+        { date: date, execution_strength: 100, raw_payload: {} }
+      end
     end
   end
 
@@ -71,13 +89,26 @@ class MarketSnapshotCollectorTest < ActiveSupport::TestCase
     stock = Stock.create!(ticker: "005930", name: "삼성전자")
     snapshot.snapshot_items.create!(stock: stock, trade_value: 1, change_rate: 1, volume: 1, current_price: 1_000)
 
-    assert_raises(MarketSnapshotCollector::CollectionError) do
+    assert_raises(Kiwoom::ApiError) do
       MarketSnapshotCollector.new(client: FailingClient.new).collect!(trade_date: snapshot.trade_date, snapshot_type: snapshot.snapshot_type)
     end
 
     snapshot.reload
     assert_equal "failed", snapshot.status
     assert_equal 1, snapshot.snapshot_items.count
+  end
+
+  test "skips candidates with insufficient metric history" do
+    snapshot = MarketSnapshotCollector.new(client: PartialMetricsClient.new).collect!(
+      trade_date: Date.new(2026, 6, 5),
+      snapshot_type: "intraday"
+    )
+
+    tickers = snapshot.snapshot_items.joins(:stock).pluck("stocks.ticker")
+
+    assert_equal "success", snapshot.status
+    assert_equal [ "000002" ], tickers
+    assert_equal 1, snapshot.collection_logs.where(level: "warn", stage: "metrics").count
   end
 
   test "keeps candidates with trade value over 100 billion won or change rate over 10 percent" do
