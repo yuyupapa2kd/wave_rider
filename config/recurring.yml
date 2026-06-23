@@ -13,7 +13,7 @@ default: &default
   collect_intraday_snapshot:
     class: CollectMarketSnapshotJob
     args: [ "intraday" ]
-    schedule: every day at 3pm
+    schedule: every day at 2:30pm
   collect_closing_snapshot:
     class: CollectMarketSnapshotJob
     args: [ "closing" ]

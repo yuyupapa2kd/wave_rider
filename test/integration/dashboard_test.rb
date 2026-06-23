@@ -24,7 +24,7 @@ class DashboardTest < ActionDispatch::IntegrationTest
     login
     MarketSnapshot.create!(trade_date: Date.new(2026, 6, 11), snapshot_type: "intraday", status: "success")
 
-    travel_to Time.zone.local(2026, 6, 12, 15, 5) do
+    travel_to Time.zone.local(2026, 6, 12, 14, 35) do
       assert_difference -> { MarketSnapshot.where(trade_date: Date.new(2026, 6, 12), snapshot_type: "intraday").count }, 1 do
         get root_path
       end
@@ -32,7 +32,7 @@ class DashboardTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "select[name='trade_date'] option", text: "2026-06-12"
-    assert_includes response.body, "2026-06-12 15:00 장중"
+    assert_includes response.body, "2026-06-12 14:30 장중"
   end
 
   private

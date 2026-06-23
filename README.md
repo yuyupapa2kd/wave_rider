@@ -115,7 +115,7 @@ docker compose down --volumes --rmi local --remove-orphans
 
 Solid Queue recurring task가 아래 두 시각에 수집 잡을 넣습니다.
 
-- 15:00 장중 스냅샷
+- 14:30 장중 스냅샷
 - 16:00 장마감 확정 스냅샷
 
 각 잡은 키움 API로 실제 거래일 여부를 확인하고, 비거래일이면 수집하지 않습니다.

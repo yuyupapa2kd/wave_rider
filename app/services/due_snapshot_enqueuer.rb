@@ -1,6 +1,6 @@
 class DueSnapshotEnqueuer
   SCHEDULES = {
-    "intraday" => { hour: 15, min: 0 },
+    "intraday" => { hour: 14, min: 30 },
     "closing" => { hour: 16, min: 0 }
   }.freeze
 

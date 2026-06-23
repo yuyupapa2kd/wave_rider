@@ -2,7 +2,7 @@ require "test_helper"
 
 class DueSnapshotEnqueuerTest < ActiveSupport::TestCase
   test "enqueues missing intraday snapshot after intraday due time" do
-    now = Time.zone.local(2026, 6, 12, 15, 5)
+    now = Time.zone.local(2026, 6, 12, 14, 35)
 
     assert_difference -> { MarketSnapshot.where(trade_date: now.to_date, snapshot_type: "intraday").count }, 1 do
       assert_difference -> { SolidQueue::Job.where(class_name: "CollectMarketSnapshotJob").count }, 1 do
@@ -15,10 +15,20 @@ class DueSnapshotEnqueuerTest < ActiveSupport::TestCase
   end
 
   test "does not enqueue duplicate snapshots" do
-    now = Time.zone.local(2026, 6, 12, 15, 5)
+    now = Time.zone.local(2026, 6, 12, 14, 35)
     MarketSnapshot.create!(trade_date: now.to_date, snapshot_type: "intraday", status: "success")
 
     assert_no_difference -> { MarketSnapshot.count } do
+      assert_no_difference -> { SolidQueue::Job.where(class_name: "CollectMarketSnapshotJob").count } do
+        DueSnapshotEnqueuer.new(now: now).enqueue_due!
+      end
+    end
+  end
+
+  test "does not enqueue intraday snapshot before intraday due time" do
+    now = Time.zone.local(2026, 6, 12, 14, 29)
+
+    assert_no_difference -> { MarketSnapshot.where(trade_date: now.to_date, snapshot_type: "intraday").count } do
       assert_no_difference -> { SolidQueue::Job.where(class_name: "CollectMarketSnapshotJob").count } do
         DueSnapshotEnqueuer.new(now: now).enqueue_due!
       end

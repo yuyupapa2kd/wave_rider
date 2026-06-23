@@ -1,6 +1,6 @@
 class MarketSnapshot < ApplicationRecord
   SNAPSHOT_TYPES = {
-    "intraday" => "15:00 장중",
+    "intraday" => "14:30 장중",
     "closing" => "16:00 장마감 확정"
   }.freeze
 
