@@ -51,6 +51,40 @@ module ApplicationHelper
     }.fetch(snapshot.status, snapshot.status)
   end
 
+  def global_asset_change_class(value)
+    number = BigDecimal(value.to_s)
+    return "is-flat" if number.zero?
+
+    number.positive? ? "is-up" : "is-down"
+  end
+
+  def format_global_asset_price(value)
+    format_global_asset_decimal(value, signed: false)
+  end
+
+  def format_global_asset_change(value)
+    format_global_asset_decimal(value, signed: true)
+  end
+
+  def format_global_asset_percent(value)
+    "#{format_global_asset_decimal(value, signed: true, precision: 2)}%"
+  end
+
+  def format_global_asset_decimal(value, signed:, precision: nil)
+    number = BigDecimal(value.to_s)
+    selected_precision = precision || (number.abs < 10 ? 4 : 2)
+    formatted = number_with_precision(
+      number.abs,
+      precision: selected_precision,
+      delimiter: ",",
+      strip_insignificant_zeros: true
+    )
+    sign = signed && number.positive? ? "+" : ""
+    sign = "-" if signed && number.negative?
+
+    "#{sign}#{formatted}"
+  end
+
   def sector_preview_groups(groups)
     groups.to_a.reject(&:unassigned?).sort_by { |group| -group.total_trade_value }
   end

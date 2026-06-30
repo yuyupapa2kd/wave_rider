@@ -31,6 +31,34 @@
     </div>
   </div>
 
+  <% if @snapshot&.successful_data? %>
+    <section class="global-assets" aria-label="글로벌자산">
+      <div class="global-assets-grid">
+        <% @global_asset_groups.each do |group| %>
+          <section class="global-asset-category">
+            <h2><%= group.fetch(:label) %></h2>
+
+            <% if group.fetch(:snapshots).any? %>
+              <div class="global-asset-list">
+                <% group.fetch(:snapshots).each do |asset| %>
+                  <% change_class = global_asset_change_class(asset.change_rate) %>
+                  <div class="global-asset-row">
+                    <strong class="global-asset-name"><%= asset.name %></strong>
+                    <span class="global-asset-price"><%= format_global_asset_price(asset.price) %></span>
+                    <span class="global-asset-change <%= change_class %>"><%= format_global_asset_change(asset.change_value) %></span>
+                    <span class="global-asset-change <%= change_class %>"><%= format_global_asset_percent(asset.change_rate) %></span>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="global-assets-empty">저장된 데이터 없음</p>
+            <% end %>
+          </section>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
   <% preview_groups = sector_preview_groups(@groups) %>
   <% if @snapshot&.successful_data? && preview_groups.any? %>
     <section class="sector-preview" aria-label="섹터 프리뷰">

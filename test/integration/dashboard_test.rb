@@ -51,7 +51,8 @@ class DashboardTest < ActionDispatch::IntegrationTest
     get root_path(trade_date: trade_date, snapshot_type: snapshot.snapshot_type)
 
     assert_response :success
-    assert_select ".toolbar + .sector-preview"
+    assert_select ".toolbar + .global-assets"
+    assert_select ".global-assets + .sector-preview"
     rows = css_select(".sector-preview-row")
     assert_equal [ "바이오", "반도체", "게임", "자동차" ], rows.map { |row| row.at_css(".sector-preview-name").text.strip }
     assert_select ".sector-preview-name", text: "미지정", count: 0
@@ -61,6 +62,77 @@ class DashboardTest < ActionDispatch::IntegrationTest
     assert_select ".sector-preview-slice[stroke='#172026'][stroke-width='0.45']"
     assert_equal [ "바이오", "반도체", "게임", "기타" ], css_select(".sector-preview-label").map { |node| node.text.strip }
     assert_select ".sector-preview-label", text: "자동차", count: 0
+  end
+
+  test "renders global assets above sector preview for the selected snapshot" do
+    login
+    trade_date = Date.new(2026, 6, 5)
+    sector = Sector.create!(name: "반도체")
+    stock = Stock.create!(ticker: "000010", name: "테스트")
+    stock.assign_sector!(sector: sector, effective_on: trade_date)
+    snapshot = MarketSnapshot.create!(trade_date: trade_date, snapshot_type: "intraday", status: "success")
+    snapshot.snapshot_items.create!(stock: stock, trade_value: 100, change_rate: 1, volume: 1, current_price: 1_000)
+
+    GlobalAssetSnapshot.create!(
+      trade_date: trade_date,
+      snapshot_type: "intraday",
+      category: "indices",
+      category_position: 0,
+      asset_code: "nasdaq",
+      position: 0,
+      name: "나스닥",
+      price: BigDecimal("100.12"),
+      change_value: BigDecimal("1.2"),
+      change_rate: BigDecimal("1.23"),
+      source: "test",
+      source_symbol: "^IXIC",
+      captured_at: Time.zone.local(2026, 6, 5, 14, 30),
+      raw_payload: {}
+    )
+    GlobalAssetSnapshot.create!(
+      trade_date: trade_date,
+      snapshot_type: "intraday",
+      category: "commodities",
+      category_position: 1,
+      asset_code: "wti",
+      position: 2,
+      name: "WTI",
+      price: BigDecimal("70.31"),
+      change_value: BigDecimal("-0.2"),
+      change_rate: BigDecimal("-0.28"),
+      source: "test",
+      source_symbol: "CL=F",
+      captured_at: Time.zone.local(2026, 6, 5, 14, 30),
+      raw_payload: {}
+    )
+
+    get root_path(trade_date: trade_date, snapshot_type: "intraday")
+
+    assert_response :success
+    assert_select ".toolbar + .global-assets"
+    assert_select ".global-assets + .sector-preview"
+    assert_select ".global-asset-category h2", text: "지수"
+    assert_select ".global-asset-row", text: /나스닥/
+    assert_select ".global-asset-price", text: "100.12"
+    assert_select ".global-asset-change.is-up", text: "+1.2"
+    assert_select ".global-asset-change.is-up", text: "+1.23%"
+    assert_select ".global-asset-change.is-down", text: "-0.2"
+    assert_select ".global-asset-change.is-down", text: "-0.28%"
+  end
+
+  test "renders empty global asset categories when collection data is missing" do
+    login
+    trade_date = Date.new(2026, 6, 5)
+    sector = Sector.create!(name: "반도체")
+    stock = Stock.create!(ticker: "000011", name: "테스트2")
+    stock.assign_sector!(sector: sector, effective_on: trade_date)
+    snapshot = MarketSnapshot.create!(trade_date: trade_date, snapshot_type: "intraday", status: "success")
+    snapshot.snapshot_items.create!(stock: stock, trade_value: 100, change_rate: 1, volume: 1, current_price: 1_000)
+
+    get root_path(trade_date: trade_date, snapshot_type: "intraday")
+
+    assert_response :success
+    assert_select ".global-assets-empty", count: GlobalAssets::Registry::CATEGORIES.size
   end
 
   test "enqueues due snapshot before selecting latest date" do

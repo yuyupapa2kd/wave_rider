@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_05_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_30_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,6 +45,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_05_090000) do
     t.datetime "updated_at", null: false
     t.index ["snapshot_item_id", "metric_date"], name: "index_daily_metrics_on_snapshot_item_id_and_metric_date", unique: true
     t.index ["snapshot_item_id"], name: "index_daily_metrics_on_snapshot_item_id"
+  end
+
+  create_table "global_asset_snapshots", force: :cascade do |t|
+    t.string "asset_code", null: false
+    t.datetime "captured_at", null: false
+    t.string "category", null: false
+    t.integer "category_position", null: false
+    t.decimal "change_rate", precision: 12, scale: 6, null: false
+    t.decimal "change_value", precision: 20, scale: 6, null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", null: false
+    t.decimal "price", precision: 20, scale: 6, null: false
+    t.jsonb "raw_payload", default: {}, null: false
+    t.string "snapshot_type", null: false
+    t.string "source", null: false
+    t.string "source_symbol", null: false
+    t.date "trade_date", null: false
+    t.datetime "updated_at", null: false
+    t.index ["trade_date", "snapshot_type", "asset_code"], name: "idx_on_trade_date_snapshot_type_asset_code_0d77c8c4a5", unique: true
+    t.index ["trade_date", "snapshot_type", "category_position", "position"], name: "idx_on_trade_date_snapshot_type_category_position_p_5a923f338a"
   end
 
   create_table "leader_selections", force: :cascade do |t|
