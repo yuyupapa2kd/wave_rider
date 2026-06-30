@@ -31,6 +31,48 @@
     </div>
   </div>
 
+  <% preview_groups = sector_preview_groups(@groups) %>
+  <% if @snapshot&.successful_data? && preview_groups.any? %>
+    <section class="sector-preview" aria-label="섹터 프리뷰">
+      <div class="sector-preview-chart-wrap">
+        <svg class="sector-preview-chart" viewBox="0 0 100 100" role="img" aria-label="섹터별 총거래대금 비중">
+          <% sector_preview_pie_slices(preview_groups).each do |slice| %>
+            <% if slice.fetch(:full_circle) %>
+              <circle class="sector-preview-slice" cx="50" cy="50" r="46" fill="<%= slice.fetch(:color) %>" stroke="#172026" stroke-width="0.45"></circle>
+            <% else %>
+              <path class="sector-preview-slice" d="<%= slice.fetch(:path) %>" fill="<%= slice.fetch(:color) %>" stroke="#172026" stroke-width="0.45"></path>
+            <% end %>
+            <% if slice.fetch(:label).present? %>
+              <text class="sector-preview-label" x="<%= slice.fetch(:label_x) %>" y="<%= slice.fetch(:label_y) %>" text-anchor="middle" dominant-baseline="middle">
+                <%= slice.fetch(:label) %>
+              </text>
+            <% end %>
+          <% end %>
+          <circle class="sector-preview-hole" cx="50" cy="50" r="22"></circle>
+          <text class="sector-preview-center-title" x="50" y="45" text-anchor="middle">총거래대금</text>
+          <text class="sector-preview-center-value" x="50" y="56" text-anchor="middle"><%= format_ekrw(preview_groups.sum(&:total_trade_value)) %></text>
+        </svg>
+      </div>
+
+      <div class="sector-preview-list" aria-label="섹터별 요약">
+        <% preview_groups.each do |group| %>
+          <% preview_color = sector_preview_color(group.weighted_change_rate) %>
+          <div class="sector-preview-row">
+            <div class="sector-preview-name-cell">
+              <span class="sector-preview-swatch" style="background: <%= preview_color %>;"></span>
+              <span class="sector-preview-name"><%= group.sector.name %></span>
+            </div>
+            <span class="sector-preview-count"><%= group.items.size %>종목</span>
+            <span class="sector-preview-value"><%= format_ekrw(group.total_trade_value) %></span>
+            <span class="sector-preview-change" style="color: <%= sector_preview_change_color(group.weighted_change_rate) %>;">
+              <%= format_percent(group.weighted_change_rate) %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
   <% if @snapshot&.status == "failed" %>
     <p class="snapshot-message">수집 실패: <%= @snapshot.simple_failure_message %></p>
   <% elsif @snapshot&.status == "skipped" %>
